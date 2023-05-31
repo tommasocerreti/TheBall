@@ -37,7 +37,8 @@ class Ball:
         self.speed = speed
         self.direction_x = 1
         self.direction_y = -1
-    
+        self.touch_count = 0  # Contatore dei tocchi
+        
     def move(self):
         self.x += self.speed * self.direction_x
         self.y += self.speed * self.direction_y
@@ -45,8 +46,10 @@ class Ball:
         # Rimbalzo sui bordi
         if self.x < self.radius or self.x > width - self.radius:
             self.direction_x *= -1
+            self.touch_count += 1  # Incremento del contatore dei tocchi
         if self.y < self.radius:
             self.direction_y *= -1
+            self.touch_count += 1  # Incremento del contatore dei tocchi
         
         # Controllo collisione con la barra
         if self.y + self.radius > paddle.y and self.x > paddle.x and self.x < paddle.x + paddle.width:
@@ -55,6 +58,10 @@ class Ball:
         # Controllo se la palla è caduta
         if self.y > height:
             game_over()
+            
+        # Aggiornamento del punteggio
+        global score
+        score = self.touch_count
 
     def draw(self):
         pygame.draw.circle(screen, (255, 255, 255), (self.x, self.y), self.radius)
@@ -93,6 +100,9 @@ ball_radius = 10
 ball_speed = 0.5
 ball = Ball(width // 2, height // 2, ball_radius, ball_speed)
 
+font = pygame.font.SysFont("Arial", 20)  # Font per il contatore dei tocchi
+score = 0  # Variabile per il punteggio
+
 game_running = True
 
 while game_running:
@@ -109,6 +119,10 @@ while game_running:
     paddle.draw()
     ball.draw()
 
+    # Aggiornamento del punteggio
+    score_text = font.render("Score: {}".format(score), True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+
     if ball.y > height:
         game_over()
         game_running = False
@@ -121,6 +135,7 @@ reset_game()  # Avvia la prima partita
 while True:  # Ciclo per avviare nuove partite dopo la schermata di game over
     reset_game()
     game_running = True
+    score = 0  # Reimposta il punteggio a zero
     
     while game_running:
         for event in pygame.event.get():
@@ -135,6 +150,10 @@ while True:  # Ciclo per avviare nuove partite dopo la schermata di game over
         screen.fill((0, 0, 0))
         paddle.draw()
         ball.draw()
+
+        # Aggiornamento del punteggio
+        score_text = font.render("Score: {}".format(score), True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
 
         if ball.y > height:
             game_over()
